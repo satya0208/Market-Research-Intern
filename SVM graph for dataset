@@ -1,0 +1,155 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+#importing libraries
+
+import numpy as np  # for handling multi-dimensional array operation
+import pandas as pd  # for reading data from csv 
+import statsmodels.api as sm  # for finding the p-value
+from sklearn.preprocessing import MinMaxScaler  # for normalization
+from sklearn.model_selection import train_test_split as tts
+from sklearn.metrics import accuracy_score 
+from sklearn.utils import shuffle
+import matplotlib.pyplot as plt  
+from sklearn.linear_model import LogisticRegression 
+from sklearn.svm import SVC  
+from sklearn.manifold import TSNE 
+import matplotlib.pyplot as plt 
+import seaborn as sns 
+from keras.layers import Input, Dense 
+from keras.models import Model, Sequential 
+from keras import regularizers 
+from sklearn import svm, datasets
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# In[2]:
+
+
+#reading data of epileptic sheet
+df1=pd.read_csv('epilepsy_sheet1.csv')
+print(df1.shape)
+df1.head()
+
+
+# In[3]:
+
+
+#transpose of df1
+result1=df1.transpose()
+result1.head()
+
+
+# In[4]:
+
+
+result1['Class Label']='Epileptic'
+result1.head()
+
+
+# In[5]:
+
+
+#Reading second sheet of healthy patients
+df2=pd.read_csv('epilepsy_sheet2.csv')
+print(df2.shape)
+df2.head()
+
+
+# In[6]:
+
+
+#transpose of df2
+result2=df2.transpose()
+result2.head()
+
+
+# In[7]:
+
+
+#adding class label
+result2['Class Label']='Healthy'
+result2.head()
+
+
+# In[8]:
+
+
+frame=[result1,result2]
+new=pd.concat(frame)
+new.head()
+
+
+# In[9]:
+
+
+check_map = {'Epileptic':1, 'Healthy':0}
+new['Class Label'] = new['Class Label'].map(check_map)
+new.head()
+
+
+# In[10]:
+
+
+#Splitting the dataset into training and test samples
+
+from sklearn.model_selection import train_test_split
+training_set, test_set = train_test_split(new, test_size = 0.2, random_state = 1)
+
+
+# In[11]:
+
+
+#Classifying the predictors and target
+
+X_train = training_set.iloc[:,0:2].values
+Y_train = training_set.iloc[:,4097].values
+X_test = test_set.iloc[:,0:4097].values
+Y_test = test_set.iloc[:,4097].values
+
+
+# In[34]:
+
+
+# Create a SVC classifier using a linear kernel
+svm = SVC(kernel='linear', C=1, random_state=0)
+# Train the classifier
+svm.fit(X_train, Y_train)
+from mlxtend.plotting import plot_decision_regions
+# Visualize the decision boundaries
+value=1.5
+plot_decision_regions(X_train, Y_train.astype(np.integer), clf=svm)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+
+# In[36]:
+
+
+# Create a SVC classifier using an RBF kernel
+svm = SVC(kernel='rbf', random_state=0, gamma=.01, C=1)
+# Train the classifier
+svm.fit(X_train, Y_train)
+
+# Visualize the decision boundaries
+plot_decision_regions(X_train, Y_train, clf=svm)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
