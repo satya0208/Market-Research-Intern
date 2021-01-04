@@ -1,0 +1,337 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+#importing libraries
+
+import numpy as np  # for handling multi-dimensional array operation
+import pandas as pd  # for reading data from csv 
+import statsmodels.api as sm  # for finding the p-value
+from sklearn.preprocessing import MinMaxScaler  # for normalization
+from sklearn.model_selection import train_test_split as tts
+from sklearn.metrics import accuracy_score 
+from sklearn.utils import shuffle
+import matplotlib.pyplot as plt  
+from sklearn.linear_model import LogisticRegression 
+from sklearn.svm import SVC  
+from sklearn.manifold import TSNE 
+import matplotlib.pyplot as plt 
+import seaborn as sns 
+from keras.layers import Input, Dense 
+from keras.models import Model, Sequential 
+from keras import regularizers 
+from sklearn import svm, datasets
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# In[2]:
+
+
+#reading data of epileptic sheet
+df1=pd.read_csv('epilepsy_sheet1.csv')
+print(df1.shape)
+df1.head()
+
+
+# In[3]:
+
+
+#transpose of df1
+result1=df1.transpose()
+result1.head()
+
+
+# In[4]:
+
+
+result1['Class Label']='Epileptic'
+result1.head()
+
+
+# In[5]:
+
+
+#Reading second sheet of healthy patients
+df2=pd.read_csv('epilepsy_sheet2.csv')
+print(df2.shape)
+df2.head()
+
+
+# In[6]:
+
+
+#transpose of df2
+result2=df2.transpose()
+result2.head()
+
+
+# In[7]:
+
+
+#adding class label
+result2['Class Label']='Healthy'
+result2.head()
+
+
+# In[8]:
+
+
+frame=[result1,result2]
+new=pd.concat(frame)
+new.head()
+
+
+# In[9]:
+
+
+new
+
+
+# In[11]:
+
+
+# plotting the data
+plt.plot(range(4097), new.iloc[399,0:4097])
+plt.title('An epileptic waveform')
+plt.show()
+
+
+# In[12]:
+
+
+plt.plot(range(4097), new.iloc[0,0:4097])
+plt.title('A non-epileptic waveform')
+plt.show()
+
+
+# In[13]:
+
+
+#But the above two graphs are not easily distinguishable
+
+
+# In[14]:
+
+
+import seaborn as sns
+sns.set_style('whitegrid')
+sns.countplot(x='Class Label',data=new, palette='winter')
+
+
+# In[15]:
+
+
+# Separating the dependent and independent variables 
+y = new['Class Label'] 
+X = new.drop('Class Label', axis = 1) 
+#Exploring data 
+new.info()
+
+
+# In[16]:
+
+
+#defining a utility function to plot the data
+def tsne_plot(x, y): 
+      
+    # Setting the plotting background 
+    sns.set(style ="whitegrid") 
+      
+    tsne = TSNE(n_components = 2, random_state = 0) 
+      
+    # Reducing the dimensionality of the data 
+    X_transformed = tsne.fit_transform(x) 
+  
+    plt.figure(figsize =(12, 8)) 
+      
+    # Building the scatter plot 
+    plt.scatter(X_transformed[np.where(y == 'Epileptic'), 0],  
+                X_transformed[np.where(y == 'Epileptic'), 1], 
+                marker ='o', color ='y', linewidth ='0.4', 
+                alpha = 0.8, label ='Epileptic') 
+    plt.scatter(X_transformed[np.where(y == 'Healthy'), 0], 
+                X_transformed[np.where(y == 'Healthy'), 1], 
+                marker ='o', color ='k', linewidth ='0.4', 
+                alpha = 0.8, label ='Healthy') 
+  
+    # Specifying the location of the legend 
+    plt.legend(loc ='best') 
+      
+    # Plotting the reduced data 
+    plt.show() 
+
+
+# In[16]:
+
+
+#Visualising original data
+tsne_plot(X, y) 
+
+
+# In[23]:
+
+
+#encoding Class Label data to numerical form
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+Y_train = le.fit_transform(Y_train)
+
+#After encoding , fit the encoded data to the SVM
+
+from sklearn.svm import SVC
+classifier = SVC(kernel='rbf', random_state = 1)
+classifier.fit(X_train,Y_train)
+
+
+# In[10]:
+
+
+from sklearn import svm, datasets
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import accuracy_score #for predicting accuracy score
+from sklearn.model_selection import train_test_split #for spiltting data into training and testing data
+
+
+# In[11]:
+
+
+for i in range(400):
+    if new['Class Label'][i]=='Epileptic':
+        new['Class Label'][i]=1
+    else:
+        new['Class Label'][i]=0
+
+
+# In[12]:
+
+
+new
+
+
+# In[ ]:
+
+
+
+
+
+# In[24]:
+
+
+#x_train = training_set.iloc[:,0:4097].values
+#y_train = training_set.iloc[:,4097].values
+#x_test = test_set.iloc[:,0:4097].values
+#y_test = test_set.iloc[:,4097].values
+
+
+# In[23]:
+
+
+#Creating train test
+#'''from sklearn.model_selection import train_test_split as tts
+#x_train, x_test, y_train, y_test= tts(x,y,test_size=0.2)'''
+
+
+# In[21]:
+
+
+#print('Size of training x is ',x_train.shape)
+#print('\n')
+#print('Size of testing x is ',x_test.shape)
+#print('\n')
+#print('Size of training y is ',y_train.shape)
+#print('\n')
+#print('Size of testing y is ',y_test.shape)
+#print('\n')
+
+
+# In[20]:
+
+
+#import svm model
+#from sklearn.svm import SVC
+#svc_model=SVC()
+
+
+# In[19]:
+
+
+#to train our SVM model with our “training” dataset
+#svc_model.fit(x_train, y_train)
+
+
+# In[88]:
+
+
+new
+
+
+# In[90]:
+
+
+new.info()
+new.head(3)
+
+
+# In[97]:
+
+
+#how many are epileptic and how many are healthy
+check_all = list(new.shape)[0]
+check_categories = list(new['Class Label'].value_counts())
+
+print("\n \t The data has {} class labels, {} epileptic and {} healthy.".format(check_all, 
+                                                                                 check_categories[0], 
+                                                                                 check_categories[1]))
+
+
+# In[12]:
+
+
+check_map = {'Epileptic':1, 'Healthy':0}
+new['Class Label'] = new['Class Label'].map(check_map)
+
+
+# In[27]:
+
+
+new.head(3)
+
+
+# In[ ]:
+
+
+color_dic = {'Epileptic':'red', 'Healthy':'blue'}
+colors = new['Class Label'].map(lambda x: color_dic.get(x))
+from pandas.plotting import scatter_matrix
+
+
+sm = pd.plotting.scatter_matrix(new[features_mean], c=colors, alpha=0.4, figsize=((15,15)));
+
+plt.show()
+
+
+# In[69]:
+
+
+y=pd.DataFrame(y)
+
+print(y.shape)
+print(type(y))
+
+
+# In[67]:
+
+
+from sklearn.svm import SVC
+svclassifier = SVC(kernel='linear')
+svclassifier.fit(X_train, y_train)
+
+
+# In[ ]:
+
+
+
+
