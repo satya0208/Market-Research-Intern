@@ -1,0 +1,255 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+#importing libraries
+
+import numpy as np  # for handling multi-dimensional array operation
+import pandas as pd  # for reading data from csv 
+import statsmodels.api as sm  # for finding the p-value
+from sklearn.preprocessing import MinMaxScaler  # for normalization
+from sklearn.model_selection import train_test_split as tts
+from sklearn.metrics import accuracy_score 
+from sklearn.utils import shuffle
+import matplotlib.pyplot as plt  
+from sklearn.linear_model import LogisticRegression 
+from sklearn.svm import SVC  
+from sklearn.manifold import TSNE 
+import matplotlib.pyplot as plt 
+import seaborn as sns 
+from keras.layers import Input, Dense 
+from keras.models import Model, Sequential 
+from keras import regularizers 
+from sklearn import svm, datasets
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# In[2]:
+
+
+#reading data of epileptic sheet
+df1=pd.read_csv('epilepsy_sheet1.csv')
+print(df1.shape)
+df1.head()
+
+
+# In[3]:
+
+
+#transpose of df1
+result1=df1.transpose()
+result1.head()
+
+
+# In[4]:
+
+
+result1['Class Label']='Epileptic'
+result1.head()
+
+
+# In[5]:
+
+
+#Reading second sheet of healthy patients
+df2=pd.read_csv('epilepsy_sheet2.csv')
+print(df2.shape)
+df2.head()
+
+
+# In[6]:
+
+
+#transpose of df2
+result2=df2.transpose()
+result2.head()
+
+
+# In[7]:
+
+
+#adding class label
+result2['Class Label']='Healthy'
+result2.head()
+
+
+# In[8]:
+
+
+frame=[result1,result2]
+new=pd.concat(frame)
+new.head()
+
+
+# In[9]:
+
+
+print("\n \t The data frame has {0[0]} rows and {0[1]} columns. \n".format(new.shape))
+new.info()
+
+
+# In[10]:
+
+
+#how many are epileptic and how many are healthy
+check_all = list(new.shape)[0]
+check_categories = list(new['Class Label'].value_counts())
+
+print("\n \t The data has {} class labels, {} epileptic and {} healthy.".format(check_all, 
+                                                                                 check_categories[0], 
+                                                                                 check_categories[1]))
+
+
+# In[11]:
+
+
+features_mean= list(new.columns[0:4097])
+
+
+# In[12]:
+
+
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import accuracy_score
+
+import time
+
+
+# In[13]:
+
+
+check_map = {'Epileptic':1, 'Healthy':0}
+new['Class Label'] = new['Class Label'].map(check_map)
+
+
+# In[14]:
+
+
+new.head(3)
+
+
+# In[15]:
+
+
+X = new.loc[:,features_mean]
+y = new.loc[:, 'Class Label']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42)
+
+accuracy_all = []
+cvs_all = []
+
+
+# In[16]:
+
+
+from sklearn.svm import SVC, NuSVC, LinearSVC
+
+start = time.time()
+
+clf = SVC()
+clf.fit(X_train, y_train)
+prediction = clf.predict(X_test)
+scores = cross_val_score(clf, X, y, cv=5)
+
+end = time.time()
+
+accuracy_all.append(accuracy_score(prediction, y_test))
+cvs_all.append(np.mean(scores))
+
+print("SVC Accuracy: {0:.2%}".format(accuracy_score(prediction, y_test)))
+print("Cross validation score: {0:.2%} (+/- {1:.2%})".format(np.mean(scores), np.std(scores)*2))
+print("Execution time: {0:.5} seconds \n".format(end-start))
+
+start = time.time()
+
+clf = NuSVC()
+clf.fit(X_train, y_train)
+prediciton = clf.predict(X_test)
+scores = cross_val_score(clf, X, y, cv=5)
+
+end = time.time()
+
+accuracy_all.append(accuracy_score(prediction, y_test))
+cvs_all.append(np.mean(scores))
+
+print("NuSVC Accuracy: {0:.2%}".format(accuracy_score(prediction, y_test)))
+print("Cross validation score: {0:.2%} (+/- {1:.2%})".format(np.mean(scores), np.std(scores)*2))
+print("Execution time: {0:.5} seconds \n".format(end-start))
+
+start = time.time()
+
+clf = LinearSVC()
+clf.fit(X_train, y_train)
+prediction = clf.predict(X_test)
+scores = cross_val_score(clf, X, y, cv=5)
+
+end = time.time()
+
+accuracy_all.append(accuracy_score(prediction, y_test))
+cvs_all.append(np.mean(scores))
+
+print("LinearSVC Accuracy: {0:.2%}".format(accuracy_score(prediction, y_test)))
+print("Cross validation score: {0:.2%} (+/- {1:.2%})".format(np.mean(scores), np.std(scores)*2))
+print("Execution time: {0:.5} seconds \n".format(end-start))
+
+
+# In[17]:
+
+
+#Nearest neighbours
+from sklearn.neighbors import KNeighborsClassifier
+
+start = time.time()
+
+clf = KNeighborsClassifier()
+clf.fit(X_train, y_train)
+prediction = clf.predict(X_test)
+scores = cross_val_score(clf, X, y, cv=5)
+
+end = time.time()
+
+accuracy_all.append(accuracy_score(prediction, y_test))
+cvs_all.append(np.mean(scores))
+
+print("Accuracy: {0:.2%}".format(accuracy_score(prediction, y_test)))
+print("Cross validation score: {0:.2%} (+/- {1:.2%})".format(np.mean(scores), np.std(scores)*2))
+print("Execution time: {0:.5} seconds \n".format(end-start))
+
+
+# In[18]:
+
+
+#Naive Bayes
+from sklearn.naive_bayes import GaussianNB
+
+start = time.time()
+
+clf = GaussianNB()
+clf.fit(X_train, y_train)
+prediction = clf.predict(X_test)
+scores = cross_val_score(clf, X, y, cv=5)
+
+end = time.time()
+
+accuracy_all.append(accuracy_score(prediction, y_test))
+cvs_all.append(np.mean(scores))
+
+print("Accuracy: {0:.2%}".format(accuracy_score(prediction, y_test)))
+print("Cross validation score: {0:.2%} (+/- {1:.2%})".format(np.mean(scores), np.std(scores)*2))
+print("Execution time: {0:.5} seconds \n".format(end-start))
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
